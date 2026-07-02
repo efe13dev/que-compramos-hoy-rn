@@ -47,19 +47,23 @@ export function GlassModal({
   const cardOpacity = useSharedValue(0);
 
   useEffect(() => {
+    let focusTimer: ReturnType<typeof setTimeout> | undefined;
     if (visible) {
       setValue(initialValue);
       backdropOpacity.value = withTiming(1, { duration: 200 });
       cardScale.value = withSpring(1, { damping: 18, stiffness: 200 });
       cardOpacity.value = withTiming(1, { duration: 180 });
       // Focus después de la animación
-      setTimeout(() => inputRef.current?.focus(), 250);
+      focusTimer = setTimeout(() => inputRef.current?.focus(), 250);
     } else {
       backdropOpacity.value = withTiming(0, { duration: 180 });
       cardScale.value = withTiming(0.88, { duration: 160, easing: Easing.in(Easing.quad) });
       cardOpacity.value = withTiming(0, { duration: 160 });
     }
-  }, [visible]);
+    return () => {
+      if (focusTimer) clearTimeout(focusTimer);
+    };
+  }, [visible, initialValue]);
 
   const backdropStyle = useAnimatedStyle(() => ({
     opacity: backdropOpacity.value,

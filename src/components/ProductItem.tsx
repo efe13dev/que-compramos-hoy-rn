@@ -15,15 +15,21 @@ import { COLORS, RADIUS } from '../constants/theme';
 
 interface ProductItemProps {
   product: Product;
-  onToggle: () => void;
-  onEdit: () => void;
-  onDelete: () => void;
+  onToggle: (id: string) => void;
+  onEdit: (product: Product) => void;
+  onDelete: (id: string) => void;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function ProductItem({ product, onToggle, onEdit, onDelete }: ProductItemProps) {
+export const ProductItem = React.memo(function ProductItem({
+  product,
+  onToggle,
+  onEdit,
+  onDelete,
+}: ProductItemProps) {
   const boughtProgress = useSharedValue(product.bought ? 1 : 0);
+  const checkScale = useSharedValue(product.bought ? 1 : 0.7);
   const deleteScale = useSharedValue(1);
 
   useEffect(() => {
@@ -31,19 +37,24 @@ export function ProductItem({ product, onToggle, onEdit, onDelete }: ProductItem
       duration: 350,
       easing: Easing.out(Easing.quad),
     });
-  }, [product.bought]);
+    // ponytail: el check se anima en el efecto, no dentro del worklet
+    // (withSpring dentro de useAnimatedStyle lanza una animación por frame).
+    checkScale.value = withSpring(product.bought ? 1 : 0.7, {
+      damping: 12,
+      stiffness: 200,
+    });
+  }, [product.bought, boughtProgress, checkScale]);
 
   const containerStyle = useAnimatedStyle(() => ({
     opacity: interpolate(boughtProgress.value, [0, 1], [1, 0.52]),
   }));
 
   const textStyle = useAnimatedStyle(() => ({
-    // El tachado se aplica condicionalmente (no animable via RN), manejamos con opacity+color
     color: boughtProgress.value > 0.5 ? COLORS.textSecondary : COLORS.textPrimary,
   }));
 
   const checkStyle = useAnimatedStyle(() => ({
-    transform: [{ scale: withSpring(product.bought ? 1 : 0.7) }],
+    transform: [{ scale: checkScale.value }],
     opacity: boughtProgress.value,
   }));
 
@@ -60,7 +71,7 @@ export function ProductItem({ product, onToggle, onEdit, onDelete }: ProductItem
       `¿Eliminar "${product.name}"?`,
       [
         { text: 'Cancelar', style: 'cancel' },
-        { text: 'Eliminar', style: 'destructive', onPress: onDelete },
+        { text: 'Eliminar', style: 'destructive', onPress: () => onDelete(product.id) },
       ]
     );
   };
@@ -72,49 +83,54 @@ export function ProductItem({ product, onToggle, onEdit, onDelete }: ProductItem
       style={[styles.wrapper, containerStyle]}
     >
       {/* Checkbox + nombre */}
-      <Pressable style={styles.row} onPress={onToggle} onLongPress={onEdit}>
+      <Pressable
+        style={styles.row}
+        onPress={() => onToggle(product.id)}
+        onLongPress={() => onEdit(product)}
+        accessibilityRole="checkbox"
+        accessibilityState={{ checked: product.bought }}
+        accessibilityLabel={product.name}
+      >
         <View style={[styles.checkbox, product.bought && styles.checkboxChecked]}>
           <Animated.Text style={[styles.checkmark, checkStyle]}>✓</Animated.Text>
         </View>
 
-        <View style={styles.nameContainer}>
-          <Animated.Text
-            style={[styles.name, textStyle]}
-            numberOfLines={2}
-          >
-            {product.name}
-          </Animated.Text>
-          {product.bought && (
-            <View style={styles.strikeContainer}>
-              <Animated.View
-                style={[
-                  styles.strikeLine,
-                  {
-                    width: `${boughtProgress.value * 100}%`,
-                  } as any,
-                ]}
-              />
-            </View>
-          )}
-        </View>
+        <Animated.Text
+          style={[
+            styles.name,
+            textStyle,
+            { textDecorationLine: product.bought ? 'line-through' : 'none' },
+          ]}
+          numberOfLines={2}
+        >
+          {product.name}
+        </Animated.Text>
       </Pressable>
 
       {/* Acciones */}
       <View style={styles.actions}>
-        <Pressable style={styles.editBtn} onPress={onEdit} hitSlop={8}>
+        <Pressable
+          style={styles.editBtn}
+          onPress={() => onEdit(product)}
+          hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Editar ${product.name}`}
+        >
           <Text style={styles.editIcon}>✏️</Text>
         </Pressable>
         <AnimatedPressable
           style={[styles.deleteBtn, deleteAnimStyle]}
           onPress={handleDeletePress}
           hitSlop={8}
+          accessibilityRole="button"
+          accessibilityLabel={`Eliminar ${product.name}`}
         >
           <Text style={styles.deleteIcon}>🗑️</Text>
         </AnimatedPressable>
       </View>
     </Animated.View>
   );
-}
+});
 
 const styles = StyleSheet.create({
   wrapper: {
@@ -154,29 +170,11 @@ const styles = StyleSheet.create({
     fontSize: 14,
     fontWeight: '700',
   },
-  nameContainer: {
-    flex: 1,
-    position: 'relative',
-  },
   name: {
+    flex: 1,
     fontSize: 16,
     fontWeight: '500',
     letterSpacing: 0.1,
-  },
-  strikeContainer: {
-    position: 'absolute',
-    top: '50%',
-    left: 0,
-    right: 0,
-    height: 1.5,
-    overflow: 'hidden',
-  },
-  strikeLine: {
-    height: 1.5,
-    backgroundColor: COLORS.textSecondary,
-    position: 'absolute',
-    top: 0,
-    left: 0,
   },
   actions: {
     flexDirection: 'row',

@@ -27,7 +27,6 @@ Aplicacion movil para gestionar listas de la compra por supermercado. Construida
 | Expo Router | ~57.0 | Navegacion basada en ficheros |
 | React Native | 0.86 | Framework movil |
 | React Native Reanimated | 4.5 | Animaciones |
-| Expo Blur | ~57.0 | Efecto glassmorphism |
 | Expo Linear Gradient | ~57.0 | Fondos con gradiente |
 | AsyncStorage | 2.2 | Persistencia local |
 

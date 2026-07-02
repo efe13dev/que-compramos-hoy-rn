@@ -1,3 +1,4 @@
+import { useCallback } from 'react';
 import { useShoppingContext } from '../context/ShoppingContext';
 import { INITIAL_STORES } from '../constants/stores';
 
@@ -9,18 +10,42 @@ export function useShoppingList(storeId: string) {
   const pending = products.filter((p) => !p.bought).length;
   const bought = products.filter((p) => p.bought).length;
 
+  const addProduct = useCallback(
+    (name: string) => ctx.addProduct(storeId, name),
+    [ctx.addProduct, storeId]
+  );
+  const editProduct = useCallback(
+    (productId: string, name: string) => ctx.editProduct(storeId, productId, name),
+    [ctx.editProduct, storeId]
+  );
+  const deleteProduct = useCallback(
+    (productId: string) => ctx.deleteProduct(storeId, productId),
+    [ctx.deleteProduct, storeId]
+  );
+  const toggleProduct = useCallback(
+    (productId: string) => ctx.toggleProduct(storeId, productId),
+    [ctx.toggleProduct, storeId]
+  );
+  const clearBought = useCallback(
+    () => ctx.clearBought(storeId),
+    [ctx.clearBought, storeId]
+  );
+  const clearList = useCallback(
+    () => ctx.clearList(storeId),
+    [ctx.clearList, storeId]
+  );
+
   return {
     products,
     store,
     pending,
     bought,
-    addProduct: (name: string) => ctx.addProduct(storeId, name),
-    editProduct: (productId: string, name: string) =>
-      ctx.editProduct(storeId, productId, name),
-    deleteProduct: (productId: string) => ctx.deleteProduct(storeId, productId),
-    toggleProduct: (productId: string) => ctx.toggleProduct(storeId, productId),
-    clearBought: () => ctx.clearBought(storeId),
-    clearList: () => ctx.clearList(storeId),
+    addProduct,
+    editProduct,
+    deleteProduct,
+    toggleProduct,
+    clearBought,
+    clearList,
     resetAll: ctx.resetAll,
   };
 }

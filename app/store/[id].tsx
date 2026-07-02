@@ -78,6 +78,20 @@ export default function StoreScreen() {
     [editingProduct, editProduct]
   );
 
+  const keyExtractor = useCallback((item: Product) => item.id, []);
+
+  const renderItem = useCallback(
+    ({ item }: { item: Product }) => (
+      <ProductItem
+        product={item}
+        onToggle={toggleProduct}
+        onEdit={setEditingProduct}
+        onDelete={deleteProduct}
+      />
+    ),
+    [toggleProduct, deleteProduct]
+  );
+
   const handleResetMenu = () => {
     Alert.alert(
       'Opciones de reinicio',
@@ -200,15 +214,8 @@ export default function StoreScreen() {
           {/* Lista de productos */}
           <FlatList
             data={products}
-            keyExtractor={(item) => item.id}
-            renderItem={({ item }) => (
-              <ProductItem
-                product={item}
-                onToggle={() => toggleProduct(item.id)}
-                onEdit={() => setEditingProduct(item)}
-                onDelete={() => deleteProduct(item.id)}
-              />
-            )}
+            keyExtractor={keyExtractor}
+            renderItem={renderItem}
             contentContainerStyle={styles.listContent}
             style={styles.list}
             showsVerticalScrollIndicator={false}

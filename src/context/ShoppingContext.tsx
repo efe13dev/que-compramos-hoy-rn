@@ -15,9 +15,15 @@ import { INITIAL_STORES, STORAGE_KEY } from '../constants/stores';
 const buildInitialData = (): ShoppingData =>
   Object.fromEntries(INITIAL_STORES.map((s) => [s.id, []]));
 
+const VALID_STORE_IDS = new Set(INITIAL_STORES.map((s) => s.id));
+
 // ─── Reducer ──────────────────────────────────────────────────────────────────
 
 function reducer(state: ShoppingData, action: AppAction): ShoppingData {
+  // ponytail: ignorar acciones con storeId desconocido (evita tiendas fantasma)
+  if ('storeId' in action && !VALID_STORE_IDS.has(action.storeId)) {
+    return state;
+  }
   switch (action.type) {
     case 'LOAD_DATA':
       return action.payload;
