@@ -41,11 +41,12 @@ export default function StoreScreen() {
     editProduct,
     deleteProduct,
     toggleProduct,
-    clearBought,
     clearList,
     resetAll,
   } = useShoppingList(id);
 
+  type ListFilter = 'all' | 'pending' | 'bought';
+  const [filter, setFilter] = useState<ListFilter>('pending');
   const [addModalVisible, setAddModalVisible] = useState(false);
   const [editingProduct, setEditingProduct] = useState<Product | null>(null);
 
@@ -80,6 +81,12 @@ export default function StoreScreen() {
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
 
+  const filteredProducts = filter === 'pending'
+    ? products.filter((p) => !p.bought)
+    : filter === 'bought'
+    ? products.filter((p) => p.bought)
+    : products;
+
   const renderItem = useCallback(
     ({ item }: { item: Product }) => (
       <ProductItem
@@ -97,23 +104,6 @@ export default function StoreScreen() {
       'Opciones de reinicio',
       'Elige qué quieres hacer:',
       [
-        {
-          text: 'Limpiar comprados',
-          onPress: () => {
-            if (bought === 0) {
-              Alert.alert('Sin productos comprados', 'No hay productos marcados como comprados.');
-              return;
-            }
-            Alert.alert(
-              'Limpiar comprados',
-              `¿Eliminar los ${bought} producto${bought !== 1 ? 's' : ''} comprado${bought !== 1 ? 's' : ''}?`,
-              [
-                { text: 'Cancelar', style: 'cancel' },
-                { text: 'Limpiar', style: 'destructive', onPress: clearBought },
-              ]
-            );
-          },
-        },
         {
           text: 'Vaciar lista',
           onPress: () => {
@@ -193,27 +183,42 @@ export default function StoreScreen() {
             </Pressable>
           </Animated.View>
 
-          {/* Contadores */}
+          {/* Contadores / Filtros */}
           <Animated.View entering={FadeIn.delay(100).duration(300)} style={styles.counters}>
-            <GlassCard style={styles.counterCard} borderColor={accentColor + '40'}>
-              <Text style={[styles.counterNumber, { color: accentColor }]}>{pending}</Text>
-              <Text style={styles.counterLabel}>Pendientes</Text>
-            </GlassCard>
-            <GlassCard style={styles.counterCard} borderColor="rgba(255,255,255,0.1)">
-              <Text style={[styles.counterNumber, { color: COLORS.textSecondary }]}>{bought}</Text>
-              <Text style={styles.counterLabel}>Comprados</Text>
-            </GlassCard>
-            <GlassCard style={styles.counterCard} borderColor="rgba(255,255,255,0.1)">
-              <Text style={[styles.counterNumber, { color: COLORS.textSecondary }]}>
-                {products.length}
-              </Text>
-              <Text style={styles.counterLabel}>Total</Text>
-            </GlassCard>
+            <Pressable style={styles.counterCardWrap} onPress={() => setFilter(filter === 'pending' ? 'all' : 'pending')}>
+              <GlassCard
+                style={StyleSheet.flatten([styles.counterCard, filter === 'pending' && { backgroundColor: accentColor + '30' }])}
+                borderColor={filter === 'pending' ? accentColor : accentColor + '40'}
+              >
+                <Text style={[styles.counterNumber, { color: accentColor }]}>{pending}</Text>
+                <Text style={styles.counterLabel}>Para comprar</Text>
+              </GlassCard>
+            </Pressable>
+            <Pressable style={styles.counterCardWrap} onPress={() => setFilter(filter === 'bought' ? 'all' : 'bought')}>
+              <GlassCard
+                style={StyleSheet.flatten([styles.counterCard, filter === 'bought' && { backgroundColor: 'rgba(255,255,255,0.12)' }])}
+                borderColor={filter === 'bought' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)'}
+              >
+                <Text style={[styles.counterNumber, { color: COLORS.textSecondary }]}>{bought}</Text>
+                <Text style={styles.counterLabel}>En casa</Text>
+              </GlassCard>
+            </Pressable>
+            <Pressable style={styles.counterCardWrap} onPress={() => setFilter('all')}>
+              <GlassCard
+                style={StyleSheet.flatten([styles.counterCard, filter === 'all' && { backgroundColor: 'rgba(255,255,255,0.12)' }])}
+                borderColor={filter === 'all' ? 'rgba(255,255,255,0.5)' : 'rgba(255,255,255,0.1)'}
+              >
+                <Text style={[styles.counterNumber, { color: COLORS.textSecondary }]}>
+                  {products.length}
+                </Text>
+                <Text style={styles.counterLabel}>Total</Text>
+              </GlassCard>
+            </Pressable>
           </Animated.View>
 
           {/* Lista de productos */}
           <FlatList
-            data={products}
+            data={filteredProducts}
             keyExtractor={keyExtractor}
             renderItem={renderItem}
             contentContainerStyle={styles.listContent}
@@ -336,8 +341,10 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     marginBottom: 16,
   },
-  counterCard: {
+  counterCardWrap: {
     flex: 1,
+  },
+  counterCard: {
     alignItems: 'center',
     padding: 12,
   },

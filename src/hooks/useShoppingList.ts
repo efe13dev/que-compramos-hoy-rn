@@ -1,4 +1,4 @@
-import { useCallback } from 'react';
+import { useCallback, useMemo } from 'react';
 import { useShoppingContext } from '../context/ShoppingContext';
 import { INITIAL_STORES } from '../constants/stores';
 
@@ -6,6 +6,13 @@ export function useShoppingList(storeId: string) {
   const ctx = useShoppingContext();
   const products = ctx.getStoreProducts(storeId);
   const store = INITIAL_STORES.find((s) => s.id === storeId);
+
+  // ponytail: sort estable, "para comprar" (!bought) primero, "en casa" (bought) después.
+  // Barato para catálogos pequeños; si crece mucho, pasar a SectionList.
+  const sortedProducts = useMemo(
+    () => [...products].sort((a, b) => Number(a.bought) - Number(b.bought)),
+    [products]
+  );
 
   const pending = products.filter((p) => !p.bought).length;
   const bought = products.filter((p) => p.bought).length;
@@ -26,17 +33,13 @@ export function useShoppingList(storeId: string) {
     (productId: string) => ctx.toggleProduct(storeId, productId),
     [ctx.toggleProduct, storeId]
   );
-  const clearBought = useCallback(
-    () => ctx.clearBought(storeId),
-    [ctx.clearBought, storeId]
-  );
   const clearList = useCallback(
     () => ctx.clearList(storeId),
     [ctx.clearList, storeId]
   );
 
   return {
-    products,
+    products: sortedProducts,
     store,
     pending,
     bought,
@@ -44,7 +47,6 @@ export function useShoppingList(storeId: string) {
     editProduct,
     deleteProduct,
     toggleProduct,
-    clearBought,
     clearList,
     resetAll: ctx.resetAll,
   };

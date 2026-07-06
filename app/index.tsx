@@ -1,10 +1,11 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
   ScrollView,
   StyleSheet,
-  Alert,
+  Pressable,
+  Modal,
 } from 'react-native';
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
@@ -12,32 +13,22 @@ import { SafeAreaView } from 'react-native-safe-area-context';
 import { INITIAL_STORES } from '../src/constants/stores';
 import { useShoppingContext } from '../src/context/ShoppingContext';
 import { StoreCard } from '../src/components/StoreCard';
-import { GlassButton } from '../src/components/GlassButton';
-import { COLORS } from '../src/constants/theme';
+import { COLORS, RADIUS } from '../src/constants/theme';
 
 export default function HomeScreen() {
   const router = useRouter();
-  const { data, resetAll } = useShoppingContext();
-
-  const handleResetAll = () => {
-    Alert.alert(
-      'Restablecer todo',
-      '¿Seguro que quieres vaciar las listas de todos los supermercados?',
-      [
-        { text: 'Cancelar', style: 'cancel' },
-        {
-          text: 'Restablecer',
-          style: 'destructive',
-          onPress: resetAll,
-        },
-      ]
-    );
-  };
+  const { data } = useShoppingContext();
+  const [cartModalVisible, setCartModalVisible] = useState(false);
 
   const totalPending = INITIAL_STORES.reduce((acc, s) => {
     const products = data[s.id] ?? [];
     return acc + products.filter((p) => !p.bought).length;
   }, 0);
+
+  const pendingByStore = INITIAL_STORES.map((store) => ({
+    store,
+    items: (data[store.id] ?? []).filter((p) => !p.bought),
+  })).filter((g) => g.items.length > 0);
 
   return (
     <View style={StyleSheet.absoluteFill}>
@@ -64,9 +55,14 @@ export default function HomeScreen() {
                   : 'Todo al día ✓'}
               </Text>
             </View>
-            <View style={styles.cartIcon}>
+            <Pressable style={styles.cartIcon} onPress={() => setCartModalVisible(true)}>
               <Text style={styles.cartEmoji}>🛒</Text>
-            </View>
+              {totalPending > 0 && (
+                <View style={styles.badge}>
+                  <Text style={styles.badgeText}>{totalPending > 99 ? '99+' : totalPending}</Text>
+                </View>
+              )}
+            </Pressable>
           </View>
 
           {/* Decoración */}
@@ -91,16 +87,52 @@ export default function HomeScreen() {
             );
           })}
 
-          {/* Botón resetear todo */}
-          <GlassButton
-            label="Restablecer todas las listas"
-            onPress={handleResetAll}
-            variant="danger"
-            icon="🔄"
-            style={styles.resetBtn}
-          />
         </ScrollView>
       </SafeAreaView>
+
+      {/* Modal: todos los productos pendientes */}
+      <Modal
+        visible={cartModalVisible}
+        transparent
+        animationType="slide"
+        onRequestClose={() => setCartModalVisible(false)}
+      >
+        <Pressable style={styles.modalOverlay} onPress={() => setCartModalVisible(false)}>
+          <Pressable style={styles.modalSheet} onPress={(e) => e.stopPropagation()}>
+            <View style={styles.modalHandle} />
+            <Text style={styles.modalTitle}>Para comprar</Text>
+            {pendingByStore.length === 0 ? (
+              <View style={styles.emptyModal}>
+                <Text style={styles.emptyModalEmoji}>✅</Text>
+                <Text style={styles.emptyModalText}>¡No queda nada por comprar!</Text>
+              </View>
+            ) : (
+              <ScrollView showsVerticalScrollIndicator={false}>
+                {pendingByStore.map(({ store, items }) => (
+                  <View key={store.id} style={styles.storeGroup}>
+                    <View style={styles.storeGroupHeader}>
+                      <Text style={styles.storeGroupEmoji}>{store.emoji}</Text>
+                      <Text style={[styles.storeGroupName, { color: store.accentColor }]}>
+                        {store.name}
+                      </Text>
+                      <View style={[styles.storeGroupBadge, { backgroundColor: store.accentColor + '30', borderColor: store.accentColor + '60' }]}>
+                        <Text style={[styles.storeGroupCount, { color: store.accentColor }]}>{items.length}</Text>
+                      </View>
+                    </View>
+                    {items.map((item) => (
+                      <View key={item.id} style={styles.pendingItem}>
+                        <View style={[styles.pendingDot, { backgroundColor: store.accentColor }]} />
+                        <Text style={styles.pendingItemName}>{item.name}</Text>
+                      </View>
+                    ))}
+                  </View>
+                ))}
+                <View style={{ height: 32 }} />
+              </ScrollView>
+            )}
+          </Pressable>
+        </Pressable>
+      </Modal>
     </View>
   );
 }
@@ -115,7 +147,7 @@ const styles = StyleSheet.create({
   content: {
     paddingHorizontal: 20,
     paddingTop: 16,
-    paddingBottom: 40,
+    paddingBottom: 16,
   },
   header: {
     flexDirection: 'row',
@@ -160,7 +192,118 @@ const styles = StyleSheet.create({
     textTransform: 'uppercase',
     marginBottom: 12,
   },
-  resetBtn: {
-    marginTop: 8,
+
+  // Badge sobre el carrito
+  badge: {
+    position: 'absolute',
+    top: -4,
+    right: -4,
+    minWidth: 18,
+    height: 18,
+    borderRadius: 9,
+    backgroundColor: COLORS.pink,
+    alignItems: 'center',
+    justifyContent: 'center',
+    paddingHorizontal: 4,
+  },
+  badgeText: {
+    color: '#fff',
+    fontSize: 10,
+    fontWeight: '800',
+  },
+
+  // Modal
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    justifyContent: 'flex-end',
+  },
+  modalSheet: {
+    backgroundColor: '#130a2e',
+    borderTopLeftRadius: RADIUS.xl,
+    borderTopRightRadius: RADIUS.xl,
+    paddingHorizontal: 20,
+    paddingTop: 12,
+    paddingBottom: 40,
+    maxHeight: '80%',
+    borderTopWidth: 1,
+    borderColor: 'rgba(255,255,255,0.1)',
+  },
+  modalHandle: {
+    width: 40,
+    height: 4,
+    borderRadius: 2,
+    backgroundColor: 'rgba(255,255,255,0.2)',
+    alignSelf: 'center',
+    marginBottom: 16,
+  },
+  modalTitle: {
+    color: COLORS.textPrimary,
+    fontSize: 20,
+    fontWeight: '800',
+    marginBottom: 20,
+  },
+
+  // Estado vacío dentro del modal
+  emptyModal: {
+    alignItems: 'center',
+    paddingVertical: 40,
+  },
+  emptyModalEmoji: {
+    fontSize: 44,
+    marginBottom: 12,
+  },
+  emptyModalText: {
+    color: COLORS.textSecondary,
+    fontSize: 15,
+    textAlign: 'center',
+  },
+
+  // Grupos por tienda
+  storeGroup: {
+    marginBottom: 20,
+  },
+  storeGroupHeader: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+    marginBottom: 8,
+  },
+  storeGroupEmoji: {
+    fontSize: 18,
+  },
+  storeGroupName: {
+    fontSize: 15,
+    fontWeight: '700',
+    flex: 1,
+  },
+  storeGroupBadge: {
+    borderWidth: 1,
+    borderRadius: 10,
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+  },
+  storeGroupCount: {
+    fontSize: 12,
+    fontWeight: '700',
+  },
+
+  // Items pendientes
+  pendingItem: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 10,
+    paddingVertical: 6,
+    paddingLeft: 4,
+  },
+  pendingDot: {
+    width: 7,
+    height: 7,
+    borderRadius: 4,
+  },
+  pendingItemName: {
+    color: COLORS.textPrimary,
+    fontSize: 14,
+    flex: 1,
   },
 });

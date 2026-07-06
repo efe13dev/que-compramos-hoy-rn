@@ -9,18 +9,18 @@ export const INITIAL_STORES: Store[] = [
     gradientColors: ['#0c4a6e', '#164e63'],
   },
   {
-    id: 'lidl',
-    name: 'Lidl',
-    emoji: '🏪',
-    accentColor: '#facc15',
-    gradientColors: ['#1e1b4b', '#312e81'],
+    id: 'consum',
+    name: 'Consum',
+    emoji: '🛍️',
+    accentColor: '#f97316',
+    gradientColors: ['#3b0a02', '#5c1408'],
   },
   {
-    id: 'carrefour',
-    name: 'Carrefour',
-    emoji: '🏬',
-    accentColor: '#a855f7',
-    gradientColors: ['#1a0533', '#2d1048'],
+    id: 'ekoprix',
+    name: 'Ekoprix',
+    emoji: '🏪',
+    accentColor: '#4ade80',
+    gradientColors: ['#052e16', '#14532d'],
   },
 ];
 

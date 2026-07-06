@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { Stack } from 'expo-router';
 import { StatusBar } from 'expo-status-bar';
 import { GestureHandlerRootView } from 'react-native-gesture-handler';
@@ -6,28 +7,33 @@ import {
   ShoppingProvider,
   useShoppingContext,
 } from '../src/context/ShoppingContext';
+import { MiiSplash } from '../src/components/MiiSplash';
 
 function AppShell() {
   const { isLoaded } = useShoppingContext();
-
-  // ponytail: gate simple; hasta hidratar AsyncStorage no montamos rutas,
-  // evita race condition (escritura pisada por LOAD_DATA) y parpadeo vacío.
-  if (!isLoaded) {
-    return (
-      <View style={styles.loading}>
-        <ActivityIndicator size="large" color="#ffffff" />
-      </View>
-    );
-  }
+  const [splashDone, setSplashDone] = useState(false);
 
   return (
-    <Stack
-      screenOptions={{
-        headerShown: false,
-        animation: 'slide_from_right',
-        contentStyle: { backgroundColor: '#0a0118' },
-      }}
-    />
+    <View style={styles.root}>
+      {/* ponytail: gate simple; hasta hidratar AsyncStorage no montamos rutas,
+          evita race condition (escritura pisada por LOAD_DATA) y parpadeo vacío. */}
+      {isLoaded ? (
+        <Stack
+          screenOptions={{
+            headerShown: false,
+            animation: 'slide_from_right',
+            contentStyle: { backgroundColor: '#0a0118' },
+          }}
+        />
+      ) : (
+        <View style={styles.loading}>
+          <ActivityIndicator size="large" color="#ffffff" />
+        </View>
+      )}
+
+      {/* Splash animado por encima; se desmonta al terminar */}
+      {!splashDone && <MiiSplash onFinish={() => setSplashDone(true)} />}
+    </View>
   );
 }
 

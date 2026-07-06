@@ -75,9 +75,11 @@ export function StoreCard({ store, pending, bought, onPress, index }: StoreCardP
 
           {/* Contador */}
           <Text style={styles.subtitle}>
-            {total === 0
+            {pending === 0 && total === 0
               ? 'Lista vacía'
-              : `${bought} de ${total} productos comprados`}
+              : pending === 0
+              ? 'Todo comprado ✓'
+              : `${pending} producto${pending !== 1 ? 's' : ''} para comprar`}
           </Text>
 
           {/* Barra de progreso */}

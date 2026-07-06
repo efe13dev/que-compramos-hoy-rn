@@ -80,54 +80,55 @@ export const ProductItem = React.memo(function ProductItem({
     <Animated.View
       entering={FadeInDown.duration(300).springify()}
       exiting={FadeOutLeft.duration(250)}
-      style={[styles.wrapper, containerStyle]}
     >
-      {/* Checkbox + nombre */}
-      <Pressable
-        style={styles.row}
-        onPress={() => onToggle(product.id)}
-        onLongPress={() => onEdit(product)}
-        accessibilityRole="checkbox"
-        accessibilityState={{ checked: product.bought }}
-        accessibilityLabel={product.name}
-      >
-        <View style={[styles.checkbox, product.bought && styles.checkboxChecked]}>
-          <Animated.Text style={[styles.checkmark, checkStyle]}>✓</Animated.Text>
-        </View>
-
-        <Animated.Text
-          style={[
-            styles.name,
-            textStyle,
-            { textDecorationLine: product.bought ? 'line-through' : 'none' },
-          ]}
-          numberOfLines={2}
-        >
-          {product.name}
-        </Animated.Text>
-      </Pressable>
-
-      {/* Acciones */}
-      <View style={styles.actions}>
+      <Animated.View style={[styles.wrapper, containerStyle]}>
+        {/* Checkbox + nombre */}
         <Pressable
-          style={styles.editBtn}
-          onPress={() => onEdit(product)}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={`Editar ${product.name}`}
+          style={styles.row}
+          onPress={() => onToggle(product.id)}
+          onLongPress={() => onEdit(product)}
+          accessibilityRole="checkbox"
+          accessibilityState={{ checked: product.bought }}
+          accessibilityLabel={product.name}
         >
-          <Text style={styles.editIcon}>✏️</Text>
+          <View style={[styles.checkbox, product.bought && styles.checkboxChecked]}>
+            <Animated.Text style={[styles.checkmark, checkStyle]}>✓</Animated.Text>
+          </View>
+
+          <Animated.Text
+            style={[
+              styles.name,
+              textStyle,
+              { textDecorationLine: product.bought ? 'line-through' : 'none' },
+            ]}
+            numberOfLines={2}
+          >
+            {product.name}
+          </Animated.Text>
         </Pressable>
-        <AnimatedPressable
-          style={[styles.deleteBtn, deleteAnimStyle]}
-          onPress={handleDeletePress}
-          hitSlop={8}
-          accessibilityRole="button"
-          accessibilityLabel={`Eliminar ${product.name}`}
-        >
-          <Text style={styles.deleteIcon}>🗑️</Text>
-        </AnimatedPressable>
-      </View>
+
+        {/* Acciones */}
+        <View style={styles.actions}>
+          <Pressable
+            style={styles.editBtn}
+            onPress={() => onEdit(product)}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Editar ${product.name}`}
+          >
+            <Text style={styles.editIcon}>✏️</Text>
+          </Pressable>
+          <AnimatedPressable
+            style={[styles.deleteBtn, deleteAnimStyle]}
+            onPress={handleDeletePress}
+            hitSlop={8}
+            accessibilityRole="button"
+            accessibilityLabel={`Eliminar ${product.name}`}
+          >
+            <Text style={styles.deleteIcon}>🗑️</Text>
+          </AnimatedPressable>
+        </View>
+      </Animated.View>
     </Animated.View>
   );
 });

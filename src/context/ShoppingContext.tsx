@@ -58,12 +58,6 @@ function reducer(state: ShoppingData, action: AppAction): ShoppingData {
         ),
       };
 
-    case 'CLEAR_BOUGHT':
-      return {
-        ...state,
-        [action.storeId]: (state[action.storeId] ?? []).filter((p) => !p.bought),
-      };
-
     case 'CLEAR_LIST':
       return { ...state, [action.storeId]: [] };
 
@@ -84,7 +78,6 @@ interface ShoppingContextValue {
   editProduct: (storeId: string, productId: string, name: string) => void;
   deleteProduct: (storeId: string, productId: string) => void;
   toggleProduct: (storeId: string, productId: string) => void;
-  clearBought: (storeId: string) => void;
   clearList: (storeId: string) => void;
   resetAll: () => void;
   getStoreProducts: (storeId: string) => Product[];
@@ -152,11 +145,6 @@ export function ShoppingProvider({ children }: { children: React.ReactNode }) {
     []
   );
 
-  const clearBought = useCallback(
-    (storeId: string) => dispatch({ type: 'CLEAR_BOUGHT', storeId }),
-    []
-  );
-
   const clearList = useCallback(
     (storeId: string) => dispatch({ type: 'CLEAR_LIST', storeId }),
     []
@@ -177,7 +165,6 @@ export function ShoppingProvider({ children }: { children: React.ReactNode }) {
       editProduct,
       deleteProduct,
       toggleProduct,
-      clearBought,
       clearList,
       resetAll,
       getStoreProducts,
@@ -189,7 +176,6 @@ export function ShoppingProvider({ children }: { children: React.ReactNode }) {
       editProduct,
       deleteProduct,
       toggleProduct,
-      clearBought,
       clearList,
       resetAll,
       getStoreProducts,

@@ -21,6 +21,5 @@ export type AppAction =
   | { type: 'EDIT_PRODUCT'; storeId: string; productId: string; name: string }
   | { type: 'DELETE_PRODUCT'; storeId: string; productId: string }
   | { type: 'TOGGLE_PRODUCT'; storeId: string; productId: string }
-  | { type: 'CLEAR_BOUGHT'; storeId: string }
   | { type: 'CLEAR_LIST'; storeId: string }
   | { type: 'RESET_ALL' };
