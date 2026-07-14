@@ -1,6 +1,6 @@
 import { Store } from '../types';
 
-export const INITIAL_STORES: Store[] = [
+export const SUPERMARKET_STORES: Store[] = [
   {
     id: 'mercadona',
     name: 'Mercadona',
@@ -22,6 +22,21 @@ export const INITIAL_STORES: Store[] = [
     accentColor: '#4ade80',
     gradientColors: ['#052e16', '#14532d'],
   },
+];
+
+export const OTHER_STORES: Store[] = [
+  {
+    id: 'otros',
+    name: 'Otros',
+    emoji: '📌',
+    accentColor: '#a855f7',
+    gradientColors: ['#2e1065', '#4c1d95'],
+  },
+];
+
+export const INITIAL_STORES: Store[] = [
+  ...SUPERMARKET_STORES,
+  ...OTHER_STORES,
 ];
 
 export const STORAGE_KEY = '@lista_compras_v1';

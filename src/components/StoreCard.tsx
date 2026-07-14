@@ -16,11 +16,12 @@ interface StoreCardProps {
   bought: number;
   onPress: () => void;
   index: number;
+  compact?: boolean;
 }
 
 const AnimatedPressable = Animated.createAnimatedComponent(Pressable);
 
-export function StoreCard({ store, pending, bought, onPress, index }: StoreCardProps) {
+export function StoreCard({ store, pending, bought, onPress, index, compact = false }: StoreCardProps) {
   const scale = useSharedValue(1);
 
   const animStyle = useAnimatedStyle(() => ({
@@ -44,7 +45,7 @@ export function StoreCard({ store, pending, bought, onPress, index }: StoreCardP
           onPress={onPress}
           onPressIn={handlePressIn}
           onPressOut={handlePressOut}
-          style={[styles.card, SHADOW.card]}
+          style={[styles.card, compact && styles.cardCompact, SHADOW.card]}
         >
           <LinearGradient
             colors={store.gradientColors}
@@ -54,27 +55,29 @@ export function StoreCard({ store, pending, bought, onPress, index }: StoreCardP
           />
 
           {/* Borde glassmorphism encima del gradiente */}
-          <View style={styles.border} />
+          <View style={[styles.border, compact && styles.borderCompact]} />
 
           {/* Orb decorativo */}
-          <View style={[styles.orb, { backgroundColor: store.accentColor + '22' }]} />
+          {!compact && (
+            <View style={[styles.orb, { backgroundColor: store.accentColor + '22' }]} />
+          )}
 
           {/* Header */}
-          <View style={styles.header}>
-            <Text style={styles.emoji}>{store.emoji}</Text>
-            <View style={styles.badge}>
+          <View style={[styles.header, compact && styles.headerCompact]}>
+            <Text style={[styles.emoji, compact && styles.emojiCompact]}>{store.emoji}</Text>
+            <View style={[styles.badge, compact && styles.badgeCompact]}>
               <Text style={[styles.badgeText, { color: store.accentColor }]}>
                 {pending}
               </Text>
-              <Text style={styles.badgeLabel}> pendientes</Text>
+              <Text style={[styles.badgeLabel, compact && styles.badgeLabelCompact]}> pendientes</Text>
             </View>
           </View>
 
           {/* Nombre */}
-          <Text style={styles.name}>{store.name}</Text>
+          <Text style={[styles.name, compact && styles.nameCompact]}>{store.name}</Text>
 
           {/* Contador */}
-          <Text style={styles.subtitle}>
+          <Text style={[styles.subtitle, compact && styles.subtitleCompact]}>
             {pending === 0 && total === 0
               ? 'Lista vacía'
               : pending === 0
@@ -83,7 +86,7 @@ export function StoreCard({ store, pending, bought, onPress, index }: StoreCardP
           </Text>
 
           {/* Barra de progreso */}
-          {total > 0 && (
+          {!compact && total > 0 && (
             <View style={styles.progressBg}>
               <View
                 style={[
@@ -98,8 +101,8 @@ export function StoreCard({ store, pending, bought, onPress, index }: StoreCardP
           )}
 
           {/* Flecha */}
-          <View style={styles.arrowContainer}>
-            <Text style={[styles.arrow, { color: store.accentColor }]}>→</Text>
+          <View style={[styles.arrowContainer, compact && styles.arrowContainerCompact]}>
+            <Text style={[styles.arrow, compact && styles.arrowCompact, { color: store.accentColor }]}>→</Text>
           </View>
         </AnimatedPressable>
       </Animated.View>
@@ -115,11 +118,19 @@ const styles = StyleSheet.create({
     overflow: 'hidden',
     minHeight: 160,
   },
+  cardCompact: {
+    padding: 18,
+    minHeight: 88,
+    borderRadius: RADIUS.lg,
+  },
   border: {
     ...StyleSheet.absoluteFill,
     borderRadius: RADIUS.xl,
     borderWidth: 1,
     borderColor: 'rgba(255,255,255,0.15)',
+  },
+  borderCompact: {
+    borderRadius: RADIUS.lg,
   },
   orb: {
     position: 'absolute',
@@ -135,8 +146,14 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 12,
   },
+  headerCompact: {
+    marginBottom: 8,
+  },
   emoji: {
     fontSize: 32,
+  },
+  emojiCompact: {
+    fontSize: 24,
   },
   badge: {
     flexDirection: 'row',
@@ -146,6 +163,11 @@ const styles = StyleSheet.create({
     paddingVertical: 4,
     borderRadius: 20,
   },
+  badgeCompact: {
+    paddingHorizontal: 8,
+    paddingVertical: 2,
+    borderRadius: 12,
+  },
   badgeText: {
     fontSize: 15,
     fontWeight: '700',
@@ -154,17 +176,29 @@ const styles = StyleSheet.create({
     color: COLORS.textSecondary,
     fontSize: 12,
   },
+  badgeLabelCompact: {
+    fontSize: 11,
+  },
   name: {
     color: COLORS.textPrimary,
     fontSize: 26,
     fontWeight: '800',
     letterSpacing: -0.3,
   },
+  nameCompact: {
+    fontSize: 20,
+    fontWeight: '700',
+  },
   subtitle: {
     color: COLORS.textSecondary,
     fontSize: 13,
     marginTop: 4,
     marginBottom: 16,
+  },
+  subtitleCompact: {
+    fontSize: 12,
+    marginTop: 2,
+    marginBottom: 0,
   },
   progressBg: {
     height: 4,
@@ -181,8 +215,15 @@ const styles = StyleSheet.create({
     right: 24,
     bottom: 24,
   },
+  arrowContainerCompact: {
+    right: 18,
+    bottom: 18,
+  },
   arrow: {
     fontSize: 22,
     fontWeight: '700',
+  },
+  arrowCompact: {
+    fontSize: 18,
   },
 });

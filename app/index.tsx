@@ -10,7 +10,11 @@ import {
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
-import { INITIAL_STORES } from '../src/constants/stores';
+import {
+  INITIAL_STORES,
+  SUPERMARKET_STORES,
+  OTHER_STORES,
+} from '../src/constants/stores';
 import { useShoppingContext } from '../src/context/ShoppingContext';
 import { StoreCard } from '../src/components/StoreCard';
 import { COLORS, RADIUS } from '../src/constants/theme';
@@ -71,7 +75,7 @@ export default function HomeScreen() {
           {/* Supermercados */}
           <Text style={styles.sectionLabel}>Supermercados</Text>
 
-          {INITIAL_STORES.map((store, index) => {
+          {SUPERMARKET_STORES.map((store, index) => {
             const products = data[store.id] ?? [];
             const pending = products.filter((p) => !p.bought).length;
             const bought = products.filter((p) => p.bought).length;
@@ -82,6 +86,27 @@ export default function HomeScreen() {
                 pending={pending}
                 bought={bought}
                 index={index}
+                onPress={() => router.push(`/store/${store.id}`)}
+              />
+            );
+          })}
+
+          {/* Otros */}
+          <View style={styles.sectionDivider} />
+          <Text style={styles.sectionLabel}>Otros</Text>
+
+          {OTHER_STORES.map((store, index) => {
+            const products = data[store.id] ?? [];
+            const pending = products.filter((p) => !p.bought).length;
+            const bought = products.filter((p) => p.bought).length;
+            return (
+              <StoreCard
+                key={store.id}
+                store={store}
+                pending={pending}
+                bought={bought}
+                index={index + SUPERMARKET_STORES.length}
+                compact
                 onPress={() => router.push(`/store/${store.id}`)}
               />
             );
@@ -107,7 +132,7 @@ export default function HomeScreen() {
                 <Text style={styles.emptyModalText}>¡No queda nada por comprar!</Text>
               </View>
             ) : (
-              <ScrollView showsVerticalScrollIndicator={false}>
+              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
                 {pendingByStore.map(({ store, items }) => (
                   <View key={store.id} style={styles.storeGroup}>
                     <View style={styles.storeGroupHeader}>
@@ -184,6 +209,11 @@ const styles = StyleSheet.create({
     backgroundColor: 'rgba(255,255,255,0.08)',
     marginVertical: 16,
   },
+  sectionDivider: {
+    height: 1,
+    backgroundColor: 'rgba(255,255,255,0.05)',
+    marginVertical: 24,
+  },
   sectionLabel: {
     color: COLORS.textSecondary,
     fontSize: 12,
@@ -225,9 +255,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 40,
-    maxHeight: '80%',
+    height: '80%',
     borderTopWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
+  },
+  modalScroll: {
+    flex: 1,
   },
   modalHandle: {
     width: 40,
