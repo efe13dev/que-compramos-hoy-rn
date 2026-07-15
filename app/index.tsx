@@ -6,7 +6,10 @@ import {
   StyleSheet,
   Pressable,
   Modal,
+  Dimensions,
 } from 'react-native';
+
+const SCREEN_HEIGHT = Dimensions.get('window').height;
 import { useRouter } from 'expo-router';
 import { LinearGradient } from 'expo-linear-gradient';
 import { SafeAreaView } from 'react-native-safe-area-context';
@@ -255,12 +258,12 @@ const styles = StyleSheet.create({
     paddingHorizontal: 20,
     paddingTop: 12,
     paddingBottom: 40,
-    height: '80%',
+    maxHeight: '80%',
     borderTopWidth: 1,
     borderColor: 'rgba(255,255,255,0.1)',
   },
   modalScroll: {
-    flex: 1,
+    maxHeight: SCREEN_HEIGHT * 0.7,
   },
   modalHandle: {
     width: 40,
