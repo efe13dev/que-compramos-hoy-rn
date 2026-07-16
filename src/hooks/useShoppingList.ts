@@ -7,10 +7,15 @@ export function useShoppingList(storeId: string) {
   const products = ctx.getStoreProducts(storeId);
   const store = INITIAL_STORES.find((s) => s.id === storeId);
 
-  // ponytail: sort estable, "para comprar" (!bought) primero, "en casa" (bought) después.
-  // Barato para catálogos pequeños; si crece mucho, pasar a SectionList.
+  // ponytail: sort estable, "para comprar" (!bought) primero y alfabético dentro de cada grupo.
+  // localeCompare sensitivity:'base' ignora acentos/mayús. Barato para catálogos chicos.
   const sortedProducts = useMemo(
-    () => [...products].sort((a, b) => Number(a.bought) - Number(b.bought)),
+    () =>
+      [...products].sort(
+        (a, b) =>
+          Number(a.bought) - Number(b.bought) ||
+          a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })
+      ),
     [products]
   );
 

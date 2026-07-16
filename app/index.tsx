@@ -34,7 +34,9 @@ export default function HomeScreen() {
 
   const pendingByStore = INITIAL_STORES.map((store) => ({
     store,
-    items: (data[store.id] ?? []).filter((p) => !p.bought),
+    items: (data[store.id] ?? [])
+      .filter((p) => !p.bought)
+      .sort((a, b) => a.name.localeCompare(b.name, 'es', { sensitivity: 'base' })),
   })).filter((g) => g.items.length > 0);
 
   return (

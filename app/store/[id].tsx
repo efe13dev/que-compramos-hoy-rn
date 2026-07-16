@@ -64,19 +64,37 @@ export default function StoreScreen() {
 
   const handleAdd = useCallback(
     (name: string) => {
+      const trimmed = name.trim();
+      const dup = products.some(
+        (p) => p.name.localeCompare(trimmed, 'es', { sensitivity: 'base' }) === 0
+      );
+      if (dup) {
+        Alert.alert('Ya existe', `«${trimmed}» ya está en la lista.`);
+        return;
+      }
       addProduct(name);
       setAddModalVisible(false);
     },
-    [addProduct]
+    [addProduct, products]
   );
 
   const handleEdit = useCallback(
     (name: string) => {
       if (!editingProduct) return;
+      const trimmed = name.trim();
+      const dup = products.some(
+        (p) =>
+          p.id !== editingProduct.id &&
+          p.name.localeCompare(trimmed, 'es', { sensitivity: 'base' }) === 0
+      );
+      if (dup) {
+        Alert.alert('Ya existe', `«${trimmed}» ya está en la lista.`);
+        return;
+      }
       editProduct(editingProduct.id, name);
       setEditingProduct(null);
     },
-    [editingProduct, editProduct]
+    [editingProduct, editProduct, products]
   );
 
   const keyExtractor = useCallback((item: Product) => item.id, []);
