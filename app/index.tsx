@@ -124,7 +124,11 @@ export default function HomeScreen() {
         animationType="slide"
         onRequestClose={() => setCartModalVisible(false)}
       >
-        <Pressable style={styles.modalOverlay} onPress={() => setCartModalVisible(false)}>
+        <View style={styles.modalOverlay}>
+          <Pressable
+            style={StyleSheet.absoluteFill}
+            onPress={() => setCartModalVisible(false)}
+          />
           <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Para comprar</Text>
@@ -163,7 +167,7 @@ export default function HomeScreen() {
               </ScrollView>
             )}
           </View>
-        </Pressable>
+        </View>
       </Modal>
     </View>
   );
