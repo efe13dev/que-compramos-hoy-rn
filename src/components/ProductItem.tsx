@@ -9,6 +9,8 @@ import Animated, {
   FadeOutLeft,
   Easing,
   interpolate,
+  interpolateColor,
+  LinearTransition,
 } from 'react-native-reanimated';
 import { Product } from '../types';
 import { COLORS, RADIUS } from '../constants/theme';
@@ -50,7 +52,24 @@ export const ProductItem = React.memo(function ProductItem({
   }));
 
   const textStyle = useAnimatedStyle(() => ({
-    color: boughtProgress.value > 0.5 ? COLORS.textSecondary : COLORS.textPrimary,
+    color: interpolateColor(
+      boughtProgress.value,
+      [0, 1],
+      [COLORS.textPrimary, COLORS.textSecondary]
+    ),
+  }));
+
+  const checkboxStyle = useAnimatedStyle(() => ({
+    backgroundColor: interpolateColor(
+      boughtProgress.value,
+      [0, 1],
+      ['transparent', 'rgba(34, 211, 238, 0.2)']
+    ),
+    borderColor: interpolateColor(
+      boughtProgress.value,
+      [0, 1],
+      ['rgba(255,255,255,0.25)', COLORS.cyan]
+    ),
   }));
 
   const checkStyle = useAnimatedStyle(() => ({
@@ -80,6 +99,7 @@ export const ProductItem = React.memo(function ProductItem({
     <Animated.View
       entering={FadeInDown.duration(300).springify()}
       exiting={FadeOutLeft.duration(250)}
+      layout={LinearTransition.duration(300)}
     >
       <Animated.View style={[styles.wrapper, containerStyle]}>
         {/* Checkbox + nombre */}
@@ -91,9 +111,9 @@ export const ProductItem = React.memo(function ProductItem({
           accessibilityState={{ checked: product.bought }}
           accessibilityLabel={product.name}
         >
-          <View style={[styles.checkbox, product.bought && styles.checkboxChecked]}>
+          <Animated.View style={[styles.checkbox, checkboxStyle]}>
             <Animated.Text style={[styles.checkmark, checkStyle]}>✓</Animated.Text>
-          </View>
+          </Animated.View>
 
           <Animated.Text
             style={[
@@ -161,10 +181,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     justifyContent: 'center',
     backgroundColor: 'transparent',
-  },
-  checkboxChecked: {
-    borderColor: COLORS.cyan,
-    backgroundColor: 'rgba(34, 211, 238, 0.2)',
   },
   checkmark: {
     color: COLORS.cyan,
