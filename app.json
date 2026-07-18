@@ -2,7 +2,7 @@
   "expo": {
     "name": "Lista de Compras",
     "slug": "que-compramos-hoy-rn",
-    "version": "1.3.3",
+    "version": "1.3.4",
     "scheme": "listadecompras",
     "orientation": "portrait",
     "icon": "./assets/icon.png",
