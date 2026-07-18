@@ -125,7 +125,7 @@ export default function HomeScreen() {
         onRequestClose={() => setCartModalVisible(false)}
       >
         <Pressable style={styles.modalOverlay} onPress={() => setCartModalVisible(false)}>
-          <Pressable style={styles.modalSheet} onPress={(e) => e.stopPropagation()}>
+          <View style={styles.modalSheet}>
             <View style={styles.modalHandle} />
             <Text style={styles.modalTitle}>Para comprar</Text>
             {pendingByStore.length === 0 ? (
@@ -134,7 +134,12 @@ export default function HomeScreen() {
                 <Text style={styles.emptyModalText}>¡No queda nada por comprar!</Text>
               </View>
             ) : (
-              <ScrollView style={styles.modalScroll} showsVerticalScrollIndicator={false}>
+              <ScrollView
+                style={styles.modalScroll}
+                contentContainerStyle={styles.modalScrollContent}
+                nestedScrollEnabled
+                showsVerticalScrollIndicator={false}
+              >
                 {pendingByStore.map(({ store, items }) => (
                   <View key={store.id} style={styles.storeGroup}>
                     <View style={styles.storeGroupHeader}>
@@ -157,7 +162,7 @@ export default function HomeScreen() {
                 <View style={{ height: 32 }} />
               </ScrollView>
             )}
-          </Pressable>
+          </View>
         </Pressable>
       </Modal>
     </View>
@@ -263,6 +268,9 @@ const styles = StyleSheet.create({
   },
   modalScroll: {
     flex: 1,
+  },
+  modalScrollContent: {
+    paddingBottom: 8,
   },
   modalHandle: {
     width: 40,
